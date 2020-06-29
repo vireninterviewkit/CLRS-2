@@ -1,7 +1,10 @@
-#include <algorithm>
-#include <cassert>
+#include <cmath>
 #include <iostream>
+#include <numeric>
+#include <random>
 #include <vector>
+
+std::mt19937 gen(std::random_device{}());
 
 template <typename T>
 size_t merge(std::vector<T>& A, size_t p, size_t q, size_t r) {
@@ -42,8 +45,18 @@ size_t inversions(std::vector<T>& A) {
 }
 
 int main() {
-    std::vector<int> v {5, 4, 3, 2, 1};
-    std::cout << inversions(v);
+    constexpr size_t N = 1000;
+    constexpr size_t trials = 1000;
 
+    std::vector<int> hats(N);
+    std::iota(hats.begin(), hats.end(), 1);
+    size_t count = 0;
+    for (size_t i = 0; i < trials; i++) {
+        auto shuffled_hats = hats;
+        std::shuffle(shuffled_hats.begin(), shuffled_hats.end(), gen);
+        count += inversions(shuffled_hats);
+    }
+    std::cout << "Average inversion count : " << static_cast<double>(count) / static_cast<double>(trials) << '\n';
+    std::cout << "N * (N - 1) / 4 : " << N * (N - 1) / 4.0 << '\n';
 
 }
