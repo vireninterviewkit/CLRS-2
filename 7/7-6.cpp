@@ -23,23 +23,10 @@ std::pair<T, T> intersection(std::vector<std::pair<T, T>>& A, size_t p, size_t r
 }
 
 template <typename T>
-size_t partitionRight(std::vector<std::pair<T, T>>& A, const T& b, size_t p, size_t r) {
+size_t partition(std::vector<std::pair<T, T>>& A, const T& b, size_t p, size_t r) {
     size_t i = p - 1;
     for (size_t j = p; j < r; j++) {
-        if (A[j].first <= b) {
-            i++;
-            std::swap(A[i], A[j]);
-        }
-    }
-    std::swap(A[i + 1], A[r]);
-    return i + 1;
-}
-
-template <typename T>
-size_t partitionLeft(std::vector<std::pair<T, T>>& A, const T& e, size_t p, size_t r) {
-    size_t i = p - 1;
-    for (size_t j = p; j < r; j++) {
-        if (A[j].second < e) {
+        if (A[j].first < b) {
             i++;
             std::swap(A[i], A[j]);
         }
@@ -52,9 +39,8 @@ template <typename T>
 void fuzzySort(std::vector<std::pair<T, T>>& A, size_t p, size_t r) {
     if (p < r && r < A.size()) {
         auto [b, e] = intersection(A, p, r);
-        auto t = partitionRight(A, b, p, r);
-        auto q = partitionLeft(A, e, p, t);
-        fuzzySort(A, p, q - 1);
+        auto t = partition(A, b, p, r);
+        fuzzySort(A, p, t - 1);
         fuzzySort(A, t + 1, r);
     }
 }
@@ -62,7 +48,7 @@ void fuzzySort(std::vector<std::pair<T, T>>& A, size_t p, size_t r) {
 int main() {
     std::vector<std::pair<int, int>> v;
     constexpr size_t NUM_ELEMS = 100;
-    std::uniform_int_distribution<> dist (0, 1000);
+    std::uniform_int_distribution<> dist (0, 10);
     for (size_t i = 0; i < NUM_ELEMS; i++) {
         auto a = dist(gen);
         auto b = dist(gen);
@@ -80,6 +66,27 @@ int main() {
             throw std::runtime_error("the algorithm is wrong!");
         }
         std::cout << it.first << ", " << it.second << " : " << c << '\n';
+    }
+
+    std::vector<std::pair<double, double>> u;
+    std::uniform_real_distribution<> dist2 (0, 100);
+    for (size_t i = 0; i < NUM_ELEMS; i++) {
+        auto a = dist2(gen);
+        auto b = dist2(gen);
+        if (a <= b) {
+            u.emplace_back(a, b);
+        } else {
+            u.emplace_back(b, a);
+        }
+    }
+    fuzzySort(u, 0, u.size() - 1);
+    double d = 0;
+    for (const auto& it : u) {
+        d = std::max(d, it.first);
+        if (d > it.second) {
+            throw std::runtime_error("the algorithm is wrong!");
+        }
+        std::cout << it.first << ", " << it.second << " : " << d << '\n';
     }
 
 }
